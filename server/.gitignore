@@ -1,9 +1,9 @@
 dist/
 prisma/*.db
 coverage/
+postgres/
 
 .DS_Store
 
 prisma/migrations/dev/
 prisma/dbml/
-.env

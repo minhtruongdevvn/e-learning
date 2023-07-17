@@ -1,17 +1,12 @@
 export interface Config {
-  nest: NestConfig;
-  cors: CorsConfig;
   swagger: SwaggerConfig;
   graphql: GraphqlConfig;
   security: SecurityConfig;
 }
 
-export interface NestConfig {
+export interface AppConfig {
   port: number;
-}
-
-export interface CorsConfig {
-  enabled: boolean;
+  corEnabled?: boolean;
 }
 
 export interface SwaggerConfig {

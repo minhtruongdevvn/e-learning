@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+   server:
+      build:
+         context: .
+         dockerfile: ./docker-files/server.Dockerfile
+      ports:
+         - "${PORT}:${PORT}"
+      depends_on:
+         - postgres
+      command: sh -c "cd app/server && npm run start:prod -w server"
+
+   postgres:
+      image: postgres:13
+      restart: always
+      env_file: ./server/.env
+      ports:
+         - "${DB_PORT}:${DB_PORT}"
+      volumes:
+         - ./server/postgres:/var/lib/postgresql/data
+
+volumes:
+   postgres:
+      name: nest-db

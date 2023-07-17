@@ -1,55 +1,3 @@
-# Instructions
-
-Starter template for 😻 [NestJS](https://nestjs.com/) and [Prisma](https://www.prisma.io/).
-
-> Checkout [NestJS Prisma Schematics](https://github.com/marcjulian/nestjs-prisma) to automatically add Prisma support to your Nest application.
-
-## Version
-
-| Branch                                                                                                       |  Nest | Prisma                                               |  Graphql                                                              |
-| ------------------------------------------------------------------------------------------------------------ | ----- | ---------------------------------------------------- | --------------------------------------------------------------------- |
-| main                                                                                                       | v9    | [v4](https://github.com/prisma/prisma)         | [Code-first](https://docs.nestjs.com/graphql/quick-start#code-first)  |
-| [nest-8-prisma-3](https://github.com/fivethree-team/nestjs-prisma-starter/tree/nest-8-prisma-3)                                                                                                       | v8    | [v3](https://github.com/prisma/prisma)         | [Code-first](https://docs.nestjs.com/graphql/quick-start#code-first)  |
-| [nest-7](https://github.com/fivethree-team/nestjs-prisma-starter/tree/nest-7)                                                                                                       | v7    | [v2](https://github.com/prisma/prisma2)         | [Code-first](https://docs.nestjs.com/graphql/quick-start#code-first)  |
-| [nest-6-prisma2-code-first](https://github.com/fivethree-team/nestjs-prisma-starter/tree/nest-6-prisma2-code-first) | v6    | [v2-preview](https://github.com/prisma/prisma2) | [Code-first](https://github.com/19majkel94/type-graphql)              |
-| [nest-6-code-first](https://github.com/fivethree-team/nestjs-prisma-starter/tree/nest-6-code-first)         | v6    | [v1](https://github.com/prisma/prisma)               | [Code-first](https://github.com/19majkel94/type-graphql)              |
-| [nest-6-sdl-first](https://github.com/fivethree-team/nestjs-prisma-starter/tree/nest-6-sdl-first)                                                                                        | v6    | [v1](https://github.com/prisma/prisma)               | [SDL First](https://docs.nestjs.com/graphql/quick-start#schema-first) |
-| [nest-5](https://github.com/fivethree-team/nestjs-prisma-starter/tree/nest-5)                     | v5    | [v1](https://github.com/prisma/prisma)               | [SDL First](https://docs.nestjs.com/graphql/quick-start#schema-first) |
-
-## Features
-
-- GraphQL w/ [playground](https://github.com/prisma/graphql-playground)
-- Code-First w/ [decorators](https://docs.nestjs.com/graphql/quick-start#code-first)
-- [Prisma](https://www.prisma.io/) for database modelling, migration and type-safe access (Postgres, MySQL & MongoDB)
-- 🔐 JWT authentication w/ [passport-jwt](https://github.com/mikenicholson/passport-jwt)
-- REST API docs w/ [Swagger](https://swagger.io/)
-
-## Overview
-
-- [Instructions](#instructions)
-  - [Features](#features)
-  - [Overview](#overview)
-  - [Prisma Setup](#prisma-setup)
-    - [1. Install Dependencies](#1-install-dependencies)
-    - [2. PostgreSQL with Docker](#2-PostgreSQL-with-docker)
-    - [3. Prisma: Prisma Migrate](#3-prisma-prisma-migrate)
-    - [4. Prisma: Prisma Client JS](#4-prisma-client-js)
-    - [5. Seed the database data with this script](#5-seed-the-database-data-with-this-script)
-    - [6. Start NestJS Server](#6-start-nestjs-server)
-  - [GraphQL Playground](#graphql-playground)
-  - [Rest Api](#rest-api)
-  - [Docker](#docker)
-  - [Schema Development](#schema-development)
-  - [NestJS - Api Schema](#nestjs---api-schema)
-    - [Resolver](#resolver)
-  - [GraphQL Client](#graphql-client)
-    - [Angular](#angular)
-      - [Setup](#setup)
-      - [Queries](#queries)
-      - [Mutations](#mutations)
-      - [Subscriptions](#subscriptions)
-      - [Authentication](#authentication)
-
 ## Prisma Setup
 
 ### 1. Install Dependencies
@@ -157,8 +105,6 @@ npm run start:prod
 
 GraphQL Playground for the NestJS Server is available here: http://localhost:3000/graphql
 
-**[⬆ back to top](#overview)**
-
 ## GraphQL Playground
 
 Open up the [example GraphQL queries](graphql/auth.graphql) and copy them to the GraphQL Playground. Some queries and mutations are secured by an auth guard. You have to acquire a JWT token from `signup` or `login`. Add the `accessToken`as followed to **HTTP HEADERS** in the playground and replace `YOURTOKEN` here:
@@ -246,8 +192,6 @@ npm run prisma:generate
 npm run prisma:generate:watch
 ```
 
-**[⬆ back to top](#overview)**
-
 ## NestJS - Api Schema
 
 The [schema.graphql](./src/schema.graphql) is generated with [code first approach](https://docs.nestjs.com/graphql/quick-start#code-first) from the models, resolvers and input classes.
@@ -266,8 +210,6 @@ async getUser(@Args() args): Promise<User> {
 ```
 
 Restart the NestJS server and this time the Query to fetch a `user` should work.
-
-**[⬆ back to top](#overview)**
 
 ## GraphQL Client
 
@@ -303,8 +245,6 @@ const uri = 'http://localhost:3000/graphql';
 ```
 
 To use Apollo-Angular you can inject `private apollo: Apollo` into the constructor of a page, component or service.
-
-**[⬆ back to top](#overview)**
 
 #### Queries
 
@@ -366,8 +306,6 @@ Or unwrap the data using [RxJs](https://www.apollographql.com/docs/angular/basic
 This will end up in an `GraphQL error` because `Me` is protected by an `@UseGuards(GqlAuthGuard)` and requires an `Bearer TOKEN`.
 Please refer to the [Authentication](#authentication) section.
 
-**[⬆ back to top](#overview)**
-
 #### Mutations
 
 To execute a mutation you can use:
@@ -412,8 +350,6 @@ export class HomePage implements OnInit {
 }
 ```
 
-**[⬆ back to top](#overview)**
-
 #### Subscriptions
 
 To execute a subscription you can use:
@@ -423,8 +359,6 @@ this.apollo.subscribe({
   query: YOUR_SUBSCRIPTION_QUERY,
 });
 ```
-
-**[⬆ back to top](#overview)**
 
 #### Authentication
 
@@ -478,4 +412,6 @@ providers: [
 
 After you configured the Interceptor and retrieved the `TOKEN` from storage your request will succeed on resolvers with `@UseGuards(GqlAuthGuard)`.
 
-**[⬆ back to top](#overview)**
+---
+
+#### Project boilerplate repo: https://github.com/notiz-dev/nestjs-prisma-starter

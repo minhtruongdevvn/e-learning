@@ -1,0 +1,7 @@
+{
+   "name": "e-learning",
+   "workspaces": [
+      "client",
+      "server"
+   ]
+}

@@ -1,5 +1,5 @@
 {
-  "name": "e-learning",
+  "name": "server",
   "version": "0.0.1",
   "scripts": {
     "prebuild": "rimraf dist",

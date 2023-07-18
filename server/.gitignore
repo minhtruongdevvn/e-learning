@@ -2,6 +2,7 @@ dist/
 prisma/*.db
 coverage/
 postgres/
+**/schema.graphql
 
 .DS_Store
 

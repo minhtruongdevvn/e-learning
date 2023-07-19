@@ -5,7 +5,7 @@ query UserPosts {
 }
 
 query PublishedPostsConnection {
-  publishedPosts(first: 20, orderBy: { field: title, direction: desc }) {
+  publishedPosts(first: 20, orderBy: { field: "title", direction: desc }) {
     totalCount
     edges {
       cursor

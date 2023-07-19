@@ -1,3 +1,5 @@
 node_modules/
-/.vscode/
+**/.vscode/*
+!**/.vscode/settings-example.json
+!**/.vscode/extensions.json
 .env

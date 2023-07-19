@@ -1,27 +1,32 @@
-import { PrismaService } from 'nestjs-prisma';
-import { Prisma, User } from '@prisma/client';
 import {
-  Injectable,
-  NotFoundException,
   BadRequestException,
   ConflictException,
+  Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { PasswordService } from './password.service';
+import { Prisma, Role, User } from '@prisma/client';
+import { PrismaService } from 'nestjs-prisma';
+import { AllConfigType } from 'src/common/configs';
+import { SecurityConfig } from 'src/common/configs/config.interface';
 import { SignupInput } from './dto/signup.input';
 import { Token } from './models/token.model';
-import { SecurityConfig } from 'src/common/configs/config.interface';
+import { PasswordService } from './password.service';
 
 @Injectable()
 export class AuthService {
+  private readonly securityConfig: SecurityConfig;
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly passwordService: PasswordService,
-    private readonly configService: ConfigService
-  ) {}
+    configService: ConfigService<AllConfigType>
+  ) {
+    this.securityConfig = configService.getOrThrow('security');
+  }
 
   async createUser(payload: SignupInput): Promise<Token> {
     const hashedPassword = await this.passwordService.hashPassword(
@@ -33,7 +38,7 @@ export class AuthService {
         data: {
           ...payload,
           password: hashedPassword,
-          role: 'USER',
+          role: Role.USER,
         },
       });
 
@@ -93,17 +98,16 @@ export class AuthService {
   }
 
   private generateRefreshToken(payload: { userId: string }): string {
-    const securityConfig = this.configService.get<SecurityConfig>('security');
     return this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_REFRESH_SECRET'),
-      expiresIn: securityConfig.refreshIn,
+      secret: this.securityConfig.rtSecret,
+      expiresIn: this.securityConfig.refreshIn,
     });
   }
 
   refreshToken(token: string) {
     try {
       const { userId } = this.jwtService.verify(token, {
-        secret: this.configService.get('JWT_REFRESH_SECRET'),
+        secret: this.securityConfig.rtSecret,
       });
 
       return this.generateTokens({

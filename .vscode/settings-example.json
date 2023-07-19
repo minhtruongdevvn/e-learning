@@ -1,0 +1,4 @@
+{
+   // for GraphQL: Language Feature Support extension
+   "graphql-config.load.rootDir": "./server"
+}

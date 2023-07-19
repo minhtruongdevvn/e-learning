@@ -25,6 +25,8 @@ export interface GraphqlConfig {
 }
 
 export interface SecurityConfig {
+  atSecret: string;
+  rtSecret: string;
   expiresIn: string;
   refreshIn: string;
   bcryptSaltOrRound: string | number;

@@ -153,16 +153,6 @@ When you run your NestJS application in a Docker container update your [.env](.e
 + DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_PORT}/${POSTGRES_DB}?schema=${DB_SCHEMA}&sslmode=prefer
 ```
 
-If `DATABASE_URL` is missing in the root `.env` file, which is loaded into the Docker container, the NestJS application will exit with the following error:
-
-```bash
-(node:19) UnhandledPromiseRejectionWarning: Error: error: Environment variable not found: DATABASE_URL.
-  -->  schema.prisma:3
-   |
- 2 |   provider = "postgresql"
- 3 |   url      = env("DATABASE_URL")
-```
-
 ### Docker Compose
 
 You can also setup a the database and Nest application with the docker-compose
@@ -216,35 +206,6 @@ Restart the NestJS server and this time the Query to fetch a `user` should work.
 A GraphQL client is necessary to consume the GraphQL api provided by the NestJS Server.
 
 Checkout [Apollo](https://www.apollographql.com/) a popular GraphQL client which offers several clients for React, Angular, Vue.js, Native iOS, Native Android and more.
-
-### Angular
-
-#### Setup
-
-To start using [Apollo Angular](https://www.apollographql.com/docs/angular/basics/setup.html) simply run in an Angular and Ionic project:
-
-```bash
-ng add apollo-angular
-```
-
-`HttpLink` from apollo-angular requires the `HttpClient`. Therefore, you need to add the `HttpClientModule` to the `AppModule`:
-
-```ts
-imports: [BrowserModule,
-    HttpClientModule,
-    ...,
-    GraphQLModule],
-```
-
-You can also add the `GraphQLModule` in the `AppModule` to make `Apollo` available in your Angular App.
-
-You need to set the URL to the NestJS GraphQL Api. Open the file `src/app/graphql.module.ts` and update `uri`:
-
-```ts
-const uri = 'http://localhost:3000/graphql';
-```
-
-To use Apollo-Angular you can inject `private apollo: Apollo` into the constructor of a page, component or service.
 
 #### Queries
 

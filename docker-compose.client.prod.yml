@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+   client:
+      image: my-apache2
+      build:
+         context: .
+         dockerfile: ./docker-files/client.Dockerfile
+      ports:
+         - "${VITE_PORT}:80"

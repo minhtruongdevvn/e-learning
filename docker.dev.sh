@@ -15,7 +15,7 @@ if [ "$workspace" == "server" ]; then
         docker-compose -f docker-compose.server.yml --env-file server/.env $operation -d --no-deps $service
     fi
 elif [ "$workspace" == "client" ]; then
-    echo "not implemented"
+    docker-compose -f docker-compose.client.yml --env-file client/.env $operation -d
 else
     echo "workspace not found"
 fi

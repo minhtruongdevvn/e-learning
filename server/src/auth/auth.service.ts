@@ -1,17 +1,15 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Prisma, Role, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
 import { AllConfigType } from 'src/common/configs';
 import { SecurityConfig } from 'src/common/configs/config.interface';
-import { SignupInput } from './dto/signup.input';
 import { Token } from './models/token.model';
 import { PasswordService } from './password.service';
 
@@ -26,34 +24,6 @@ export class AuthService {
     configService: ConfigService<AllConfigType>
   ) {
     this.securityConfig = configService.getOrThrow('security');
-  }
-
-  async createUser(payload: SignupInput): Promise<Token> {
-    const hashedPassword = await this.passwordService.hashPassword(
-      payload.password
-    );
-
-    try {
-      const user = await this.prisma.user.create({
-        data: {
-          ...payload,
-          password: hashedPassword,
-          role: Role.USER,
-        },
-      });
-
-      return this.generateTokens({
-        userId: user.id,
-      });
-    } catch (e) {
-      if (
-        e instanceof Prisma.PrismaClientKnownRequestError &&
-        e.code === 'P2002'
-      ) {
-        throw new ConflictException(`Email ${payload.email} already used.`);
-      }
-      throw new Error(e);
-    }
   }
 
   async login(email: string, password: string): Promise<Token> {
@@ -86,25 +56,25 @@ export class AuthService {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  generateTokens(payload: { userId: string }): Token {
+  generateTokens(data: { userId: string }): Token {
     return {
-      accessToken: this.generateAccessToken(payload),
-      refreshToken: this.generateRefreshToken(payload),
+      accessToken: this.generateAccessToken(data),
+      refreshToken: this.generateRefreshToken(data),
     };
   }
 
-  private generateAccessToken(payload: { userId: string }): string {
-    return this.jwtService.sign(payload);
+  private generateAccessToken(data: { userId: string }): string {
+    return this.jwtService.sign(data);
   }
 
-  private generateRefreshToken(payload: { userId: string }): string {
-    return this.jwtService.sign(payload, {
+  private generateRefreshToken(data: { userId: string }): string {
+    return this.jwtService.sign(data, {
       secret: this.securityConfig.rtSecret,
       expiresIn: this.securityConfig.refreshIn,
     });
   }
 
-  refreshToken(token: string) {
+  refreshToken(token: string): Token {
     try {
       const { userId } = this.jwtService.verify(token, {
         secret: this.securityConfig.rtSecret,

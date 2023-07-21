@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { ConfigService } from '@nestjs/config';
-import { PasswordService } from './password.service';
-import { GqlAuthGuard } from './gql-auth.guard';
-import { AuthService } from './auth.service';
-import { AuthResolver } from './auth.resolver';
-import { JwtStrategy } from './jwt.strategy';
 import { SecurityConfig } from 'src/common/configs/config.interface';
+import { AuthResolver } from './auth.resolver';
+import { AuthService } from './auth.service';
+import { RolesGuard } from './guards/role.guard';
+import { PasswordService } from './password.service';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { SecurityConfig } from 'src/common/configs/config.interface';
       useFactory: async (configService: ConfigService) => {
         const securityConfig = configService.get<SecurityConfig>('security');
         return {
-          secret: configService.get<string>('JWT_ACCESS_SECRET'),
+          secret: securityConfig.atSecret,
           signOptions: {
             expiresIn: securityConfig.expiresIn,
           },
@@ -29,9 +29,9 @@ import { SecurityConfig } from 'src/common/configs/config.interface';
     AuthService,
     AuthResolver,
     JwtStrategy,
-    GqlAuthGuard,
+    RolesGuard,
     PasswordService,
   ],
-  exports: [GqlAuthGuard],
+  exports: [AuthService, PasswordService],
 })
 export class AuthModule {}

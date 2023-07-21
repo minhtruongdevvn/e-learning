@@ -1,4 +1,4 @@
-export interface JwtDto {
+export interface JwtPayload {
   userId: string;
   /**
    * Issued at

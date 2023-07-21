@@ -1,21 +1,21 @@
-import 'reflect-metadata';
 import {
+  Field,
+  HideField,
   ObjectType,
   registerEnumType,
-  HideField,
-  Field,
 } from '@nestjs/graphql';
-import { IsEmail } from 'class-validator';
-import { Post } from 'src/posts/models/post.model';
-import { BaseModel } from 'src/common/models/base.model';
 import { Role } from '@prisma/client';
+import { IsEmail } from 'class-validator';
+import 'reflect-metadata';
+import { BaseModel } from 'src/common/models/base.model';
+import { Post } from 'src/posts/models/post.model';
 
 registerEnumType(Role, {
   name: 'Role',
   description: 'User role',
 });
 
-@ObjectType()
+@ObjectType() // todo: mark abstract
 export class User extends BaseModel {
   @Field()
   @IsEmail()

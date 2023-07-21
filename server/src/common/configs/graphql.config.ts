@@ -3,7 +3,7 @@ import { GraphqlConfig } from './config.interface';
 
 export const graphqlConfig = registerAs<GraphqlConfig>('graphql', () => ({
   playgroundEnabled: true,
-  debug: true,
+  debug: false,
   schemaDestination: './src/schema.graphql',
   sortSchema: true,
 }));

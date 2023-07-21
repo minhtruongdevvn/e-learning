@@ -5,10 +5,10 @@ export class PaginationArgs {
   @Field(() => Int, { nullable: true })
   skip?: number;
 
-  @Field(() => Int, { nullable: true })
+  @Field({ nullable: true })
   after?: string;
 
-  @Field(() => Int, { nullable: true })
+  @Field({ nullable: true })
   before?: string;
 
   @Field(() => Int, { nullable: true })

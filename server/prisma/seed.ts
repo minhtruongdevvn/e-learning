@@ -5,9 +5,7 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.post.deleteMany();
 
-  console.log('Seeding...');
-
-  const user1 = await prisma.user.create({
+  await prisma.user.create({
     data: {
       email: 'lisa@simpson.com',
       firstname: 'Lisa',
@@ -23,7 +21,7 @@ async function main() {
       },
     },
   });
-  const user2 = await prisma.user.create({
+  await prisma.user.create({
     data: {
       email: 'bart@simpson.com',
       firstname: 'Bart',
@@ -46,8 +44,6 @@ async function main() {
       },
     },
   });
-
-  console.log({ user1, user2 });
 }
 
 main()

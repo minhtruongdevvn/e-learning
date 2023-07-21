@@ -13,15 +13,97 @@ generator dbml {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  email     String   @unique
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  email     String    @unique
   password  String
   firstname String?
   lastname  String?
   posts     Post[]
   role      Role
+  lecturer  Lecturer?
+  Learner   Learner?
+}
+
+model Lecturer {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String   @unique
+  department String?
+  about      String?
+  Course     Course[]
+}
+
+model Learner {
+  id           String          @id @default(cuid())
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String          @unique
+  CourseRating CourseRating[]
+  LeanerCourse LearnerCourse[]
+}
+
+model LearnerCourse {
+  learner   Learner @relation(fields: [learnerId], references: [id], onDelete: Cascade)
+  learnerId String
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId  String
+
+  @@id([learnerId, courseId])
+}
+
+model Course {
+  id           String          @id @default(cuid())
+  name         String          @db.VarChar(150)
+  price        Decimal
+  achievement  String
+  tag          String?
+  description  String?
+  avgRating    Int             @default(0)
+  totalRating  Int             @default(0)
+  leanerCount  Int             @default(0)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  imgURL       String?
+  lecturerId   String
+  Lecturer     Lecturer        @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
+  LeanerCourse LearnerCourse[]
+  CourseRating CourseRating[]
+  Category     Category[]
+  categoryId   String?
+}
+
+model Category {
+  id     String   @id @default(cuid())
+  name   String   @db.VarChar(150)
+  alias  String   @unique @db.VarChar(200)
+  course Course[]
+}
+
+model CourseRating {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  leanerId  String
+  learner   Learner  @relation(fields: [leanerId], references: [id])
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model Lecture {
+  id              String            @id @default(cuid())
+  duration        Int
+  name            String            @db.VarChar(150)
+  url             String
+  LectureResource LectureResource[]
+}
+
+model LectureResource {
+  id        String  @id @default(cuid())
+  lectureId String
+  lecture   Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
 }
 
 model Post {
@@ -38,4 +120,6 @@ model Post {
 enum Role {
   ADMIN
   USER
+  LECTURER
+  LEARNER
 }

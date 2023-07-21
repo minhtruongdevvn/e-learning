@@ -45,5 +45,8 @@ async function bootstrap() {
   }
 
   await app.listen(appConfig.port);
+
+  console.log('server started at: http://localhost:' + appConfig.port);
+  console.log(`playground: http://localhost:${appConfig.port}/graphql`);
 }
 bootstrap();

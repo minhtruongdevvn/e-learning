@@ -1,26 +1,26 @@
-import { PrismaService } from 'nestjs-prisma';
-import {
-  Resolver,
-  Query,
-  Parent,
-  Args,
-  ResolveField,
-  Subscription,
-  Mutation,
-} from '@nestjs/graphql';
 import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection';
-import { PubSub } from 'graphql-subscriptions';
 import { UseGuards } from '@nestjs/common';
-import { PaginationArgs } from 'src/common/pagination/pagination.args';
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+  Subscription,
+} from '@nestjs/graphql';
+import { PubSub } from 'graphql-subscriptions';
+import { PrismaService } from 'nestjs-prisma';
+import { GqlAuthGuard } from 'src/auth/guards/gql-auth.guard';
 import { UserEntity } from 'src/common/decorators/user.decorator';
+import { PaginationArgs } from 'src/common/pagination/pagination.args';
 import { User } from 'src/users/models/user.model';
-import { GqlAuthGuard } from 'src/auth/gql-auth.guard';
 import { PostIdArgs } from './args/post-id.args';
 import { UserIdArgs } from './args/user-id.args';
-import { Post } from './models/post.model';
-import { PostConnection } from './models/post-connection.model';
-import { PostOrder } from './dto/post-order.input';
 import { CreatePostInput } from './dto/createPost.input';
+import { PostOrder } from './dto/post-order.input';
+import { PostConnection } from './models/post-connection.model';
+import { Post } from './models/post.model';
 
 const pubSub = new PubSub();
 
@@ -51,6 +51,7 @@ export class PostsResolver {
     return newPost;
   }
 
+  @UseGuards(GqlAuthGuard)
   @Query(() => PostConnection)
   async publishedPosts(
     @Args() { after, before, first, last }: PaginationArgs,
@@ -69,7 +70,7 @@ export class PostsResolver {
           include: { author: true },
           where: {
             published: true,
-            title: { contains: query || '' },
+            title: { contains: query || '', mode: 'insensitive' },
           },
           orderBy: orderBy ? { [orderBy.field]: orderBy.direction } : undefined,
           ...args,

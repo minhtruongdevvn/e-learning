@@ -18,7 +18,7 @@ export class CoursesService {
   getById(id: string) {
     return this.prisma.course.findUnique({
       where: { id },
-      include: { Category: true, Lecturer: true }, // todo course rating
+      include: { categories: true, lecturer: true }, // todo course rating
     });
   }
 
@@ -29,7 +29,7 @@ export class CoursesService {
     const where: Prisma.CourseWhereInput = {
       OR: {
         name: { contains: name || '', mode: 'insensitive' },
-        Category: { some: { id: { in: categoryIds } } },
+        categories: { some: { id: { in: categoryIds } } },
       },
     };
 
@@ -38,8 +38,8 @@ export class CoursesService {
         this.prisma.course.findMany({
           where,
           include: {
-            Lecturer: { include: { user: true } },
-            Category: { take: noOfTakenCategory },
+            lecturer: { include: { user: true } },
+            categories: { take: noOfTakenCategory },
           },
           orderBy: order ? { [order.field]: order.direction } : undefined,
           ...args,
@@ -49,11 +49,11 @@ export class CoursesService {
     );
 
     const mappedEdges = edges.map((e): Edge<Course> => {
-      const { Lecturer, ...node } = e.node;
-      const { user, department, about } = Lecturer;
+      const { lecturer, ...node } = e.node;
+      const { user, department, about } = lecturer;
       return {
         ...e,
-        node: { ...node, Lecturer: { ...user, department, about } },
+        node: { ...node, lecturer: { ...user, department, about } },
       };
     });
 
@@ -67,7 +67,7 @@ export class CoursesService {
       data: {
         ...courseInfo,
         lecturerId,
-        Category: { connect: categoryIds.map((id) => ({ id })) },
+        categories: { connect: categoryIds.map((id) => ({ id })) },
       },
     });
   }
@@ -79,7 +79,7 @@ export class CoursesService {
       where: { id },
       data: {
         ...courseInfo,
-        Category: {
+        categories: {
           set: categoryIds.map((id) => ({ id })),
         },
       },

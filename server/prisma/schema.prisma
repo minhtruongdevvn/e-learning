@@ -23,7 +23,7 @@ model User {
   posts     Post[]
   role      Role
   lecturer  Lecturer?
-  Learner   Learner?
+  learner   Learner?
 }
 
 model Lecturer {
@@ -32,15 +32,15 @@ model Lecturer {
   userId     String   @unique
   department String?
   about      String?
-  Course     Course[]
+  course     Course[]
 }
 
 model Learner {
   id           String          @id @default(cuid())
   user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String          @unique
-  CourseRating CourseRating[]
-  LeanerCourse LearnerCourse[]
+  courseRating CourseRating[]
+  leanerCourse LearnerCourse[]
 }
 
 model LearnerCourse {
@@ -66,11 +66,10 @@ model Course {
   updatedAt    DateTime        @updatedAt
   imgURL       String?
   lecturerId   String
-  Lecturer     Lecturer        @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
-  LeanerCourse LearnerCourse[]
-  CourseRating CourseRating[]
-  Category     Category[]
-  categoryId   String?
+  lecturer     Lecturer        @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
+  leanerCourse LearnerCourse[]
+  courseRating CourseRating[]
+  categories   Category[]
 }
 
 model Category {
@@ -87,7 +86,7 @@ model CourseRating {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   leanerId  String
-  learner   Learner  @relation(fields: [leanerId], references: [id])
+  learner   Learner  @relation(fields: [leanerId], references: [id], onDelete: SetDefault)
   courseId  String
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
@@ -97,7 +96,7 @@ model Lecture {
   duration        Int
   name            String            @db.VarChar(150)
   url             String
-  LectureResource LectureResource[]
+  lectureResource LectureResource[]
 }
 
 model LectureResource {

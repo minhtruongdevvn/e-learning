@@ -25,7 +25,7 @@ export class LearnersService {
         ...data,
         password: hashedPassword,
         role: Role.LEARNER,
-        Learner: {
+        learner: {
           create: {},
         },
       },

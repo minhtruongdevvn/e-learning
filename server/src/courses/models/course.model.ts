@@ -34,8 +34,8 @@ export class Course extends BaseModel {
   imgURL: string | null;
 
   @Field(() => Lecturer)
-  Lecturer: Lecturer;
+  lecturer: Lecturer;
 
   @Field(() => [Category])
-  Category: Category[];
+  categories: Category[];
 }

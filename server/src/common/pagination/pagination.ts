@@ -16,7 +16,7 @@ export class PageInfo {
   startCursor?: string;
 }
 
-export function EdgeType<TItem>(TItemClass: Type<TItem>) {
+export function Paginated<TItem>(TItemClass: Type<TItem>) {
   @ObjectType(`${TItemClass.name}Edge`)
   abstract class EdgeType {
     @Field(() => String)
@@ -26,17 +26,11 @@ export function EdgeType<TItem>(TItemClass: Type<TItem>) {
     node: TItem;
   }
 
-  return EdgeType;
-}
-
-export function Paginated<TItem>(TItemClass: Type<TItem>) {
-  abstract class Edge extends EdgeType(TItemClass) {}
-
   // `isAbstract` decorator option is mandatory to prevent registering in schema
   @ObjectType({ isAbstract: true })
   abstract class PaginatedType {
-    @Field(() => [Edge], { nullable: true })
-    edges: Array<Edge>;
+    @Field(() => [EdgeType], { nullable: true })
+    edges: Array<EdgeType>;
 
     // @Field((type) => [TItemClass], { nullable: true })
     // nodes: Array<TItem>;

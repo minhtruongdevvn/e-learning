@@ -1,8 +1,22 @@
-import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { Type } from '@nestjs/common';
-import { PageInfo } from './page-info.model';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 
-export default function Paginated<TItem>(TItemClass: Type<TItem>) {
+@ObjectType()
+export class PageInfo {
+  @Field(() => String, { nullable: true })
+  endCursor?: string;
+
+  @Field(() => Boolean)
+  hasNextPage: boolean;
+
+  @Field(() => Boolean)
+  hasPreviousPage: boolean;
+
+  @Field(() => String, { nullable: true })
+  startCursor?: string;
+}
+
+export function EdgeType<TItem>(TItemClass: Type<TItem>) {
   @ObjectType(`${TItemClass.name}Edge`)
   abstract class EdgeType {
     @Field(() => String)
@@ -12,11 +26,17 @@ export default function Paginated<TItem>(TItemClass: Type<TItem>) {
     node: TItem;
   }
 
+  return EdgeType;
+}
+
+export function Paginated<TItem>(TItemClass: Type<TItem>) {
+  abstract class Edge extends EdgeType(TItemClass) {}
+
   // `isAbstract` decorator option is mandatory to prevent registering in schema
   @ObjectType({ isAbstract: true })
   abstract class PaginatedType {
-    @Field(() => [EdgeType], { nullable: true })
-    edges: Array<EdgeType>;
+    @Field(() => [Edge], { nullable: true })
+    edges: Array<Edge>;
 
     // @Field((type) => [TItemClass], { nullable: true })
     // nodes: Array<TItem>;
@@ -27,5 +47,6 @@ export default function Paginated<TItem>(TItemClass: Type<TItem>) {
     @Field(() => Int)
     totalCount: number;
   }
+
   return PaginatedType;
 }

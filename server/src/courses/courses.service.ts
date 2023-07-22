@@ -1,34 +1,66 @@
+import {
+  Edge,
+  findManyCursorConnection,
+} from '@devoxa/prisma-relay-cursor-connection';
 import { Injectable } from '@nestjs/common';
-import { Course, Prisma } from '@prisma/client';
+import { Course as CourseEntity, Prisma } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
+import { CoursesArg } from './args/courses.arg';
 import { CreateCourseInput } from './inputs/create-course.input';
+import { UpdateCourseInput } from './inputs/update-course.input';
+import { CourseConnection } from './models/course-connection';
+import { Course } from './models/course.model';
 
 @Injectable()
 export class CoursesService {
   constructor(private prisma: PrismaService) {}
 
-  async course(id: string): Promise<Course | null> {
+  getById(id: string) {
     return this.prisma.course.findUnique({
       where: { id },
+      include: { Category: true, Lecturer: true }, // todo course rating
     });
   }
 
-  async courses(params: {
-    skip?: number;
-    take?: number;
-    name?: string;
-    orderBy?: string;
-    order?: number;
-  }): Promise<Course[]> {
-    const { skip, take, orderBy, order } = params;
-    return this.prisma.course.findMany({
-      skip,
-      take,
-      orderBy: { [orderBy]: order == -1 ? 'desc' : 'asc' },
+  async courses(args: CoursesArg): Promise<CourseConnection> {
+    const { name, categoryIds, order } = args;
+    const noOfTakenCategory = 3;
+
+    const where: Prisma.CourseWhereInput = {
+      OR: {
+        name: { contains: name || '', mode: 'insensitive' },
+        Category: { some: { id: { in: categoryIds } } },
+      },
+    };
+
+    const { totalCount, pageInfo, edges } = await findManyCursorConnection(
+      (args) =>
+        this.prisma.course.findMany({
+          where,
+          include: {
+            Lecturer: { include: { user: true } },
+            Category: { take: noOfTakenCategory },
+          },
+          orderBy: order ? { [order.field]: order.direction } : undefined,
+          ...args,
+        }),
+      () => this.prisma.course.count({ where }),
+      args.pagination
+    );
+
+    const mappedEdges = edges.map((e): Edge<Course> => {
+      const { Lecturer, ...node } = e.node;
+      const { user, department, about } = Lecturer;
+      return {
+        ...e,
+        node: { ...node, Lecturer: { ...user, department, about } },
+      };
     });
+
+    return { totalCount, pageInfo, edges: mappedEdges };
   }
 
-  async createCourse(data: CreateCourseInput): Promise<Course> {
+  create(data: CreateCourseInput): Promise<CourseEntity> {
     const { lecturerId, categoryIds, ...courseInfo } = data;
 
     return this.prisma.course.create({
@@ -40,20 +72,21 @@ export class CoursesService {
     });
   }
 
-  async updateCourse(params: {
-    where: Prisma.CourseWhereUniqueInput;
-    data: Prisma.CourseUpdateInput;
-  }): Promise<Course> {
-    const { where, data } = params;
+  update(data: UpdateCourseInput): Promise<CourseEntity> {
+    const { id, categoryIds, ...courseInfo } = data;
+
     return this.prisma.course.update({
-      data,
-      where,
+      where: { id },
+      data: {
+        ...courseInfo,
+        Category: {
+          set: categoryIds.map((id) => ({ id })),
+        },
+      },
     });
   }
 
-  async deleteCourse(where: Prisma.CourseWhereUniqueInput): Promise<Course> {
-    return this.prisma.course.delete({
-      where,
-    });
+  delete(id: string): Promise<CourseEntity> {
+    return this.prisma.course.delete({ where: { id } });
   }
 }

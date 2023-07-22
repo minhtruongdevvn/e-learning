@@ -1,4 +1,5 @@
 import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Category } from 'src/categories/models/category.model';
 import { BaseModel } from 'src/common/models/base.model';
 import { Lecturer } from 'src/lecturers/models/lecturer.model';
@@ -12,7 +13,7 @@ export class Course extends BaseModel {
   name: string;
 
   @Field(() => Float)
-  price: number;
+  price: Prisma.Decimal;
 
   @Field(() => Int)
   avgRating: number;
@@ -33,8 +34,8 @@ export class Course extends BaseModel {
   imgURL: string | null;
 
   @Field(() => Lecturer)
-  lecturer: Lecturer;
+  Lecturer: Lecturer;
 
-  @Field()
-  categories: Category[];
+  @Field(() => [Category])
+  Category: Category[];
 }

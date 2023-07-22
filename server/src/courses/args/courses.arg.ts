@@ -1,6 +1,22 @@
-import { ArgsType, Field } from '@nestjs/graphql';
+import { ArgsType, Field, registerEnumType } from '@nestjs/graphql';
+import { Order } from 'src/common/order/order';
 import { PaginationArgs } from 'src/common/pagination/pagination.args';
-import { CourseOrderArg } from './course-order.arg';
+
+export enum CourseOrderField {
+  name = 'name',
+  avgRating = 'avgRating',
+  totalRating = 'totalRating',
+  createdAt = 'createdAt',
+  updatedAt = 'updatedAt',
+  price = 'price',
+}
+registerEnumType(CourseOrderField);
+
+@ArgsType()
+export class CourseOrderArg extends Order {
+  @Field(() => CourseOrderField)
+  field: CourseOrderField;
+}
 
 @ArgsType()
 export class CoursesArg {

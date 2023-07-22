@@ -63,7 +63,7 @@ export class PostsResolver {
       nullable: true,
     })
     orderBy: PostOrder
-  ) {
+  ): Promise<PostConnection> {
     const a = await findManyCursorConnection(
       (args) =>
         this.prisma.post.findMany({

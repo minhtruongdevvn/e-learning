@@ -18,6 +18,10 @@ export class CustomExceptionFilter
       );
     }
 
+    if (Number.isNaN(exception['status']) || exception['status'] >= 500) {
+      console.log(exception);
+    }
+
     return exception;
   }
 }

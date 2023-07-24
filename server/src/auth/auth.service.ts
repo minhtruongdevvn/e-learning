@@ -1,18 +1,17 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
 import { AllConfigType } from 'src/common/configs';
 import { SecurityConfig } from 'src/common/configs/config.interface';
+import { clientError } from 'src/common/enums/client-error.enum';
+import { ClientErrorException } from 'src/common/exceptions/client-error.exception';
 import { Token } from './models/token.model';
 import { PasswordService } from './password.service';
 
+type Claim = { userId: string } & Pick<User, 'role'> &
+  Partial<Pick<User, 'firstname' | 'lastname'>>;
 @Injectable()
 export class AuthService {
   private readonly securityConfig: SecurityConfig;
@@ -30,7 +29,10 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      throw new NotFoundException(`No user found for email: ${email}`);
+      throw new ClientErrorException(
+        clientError.NOT_FOUND,
+        `No user found for email: ${email}`
+      );
     }
 
     const passwordValid = await this.passwordService.validatePassword(
@@ -39,12 +41,13 @@ export class AuthService {
     );
 
     if (!passwordValid) {
-      throw new BadRequestException('Invalid password');
+      throw new ClientErrorException(
+        clientError.UNPROCESSABLE_ENTITY,
+        'Invalid password'
+      );
     }
 
-    return this.generateTokens({
-      userId: user.id,
-    });
+    return this.generateTokens(user);
   }
 
   validateUser(userId: string): Promise<User> {
@@ -56,33 +59,50 @@ export class AuthService {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  generateTokens(data: { userId: string }): Token {
+  async generateTokens(data: User | string): Promise<Token> {
+    let actualUser: User;
+    if (typeof data === 'string') {
+      actualUser = await this.prisma.user.findUnique({
+        where: { id: data },
+      });
+    } else {
+      actualUser = data;
+    }
+
+    const claim: Claim = {
+      userId: actualUser.id,
+      role: actualUser.role,
+      firstname: actualUser.firstname,
+      lastname: actualUser.lastname,
+    };
+
     return {
-      accessToken: this.generateAccessToken(data),
-      refreshToken: this.generateRefreshToken(data),
+      accessToken: this.generateAccessToken(claim),
+      refreshToken: this.generateRefreshToken(claim.userId),
     };
   }
 
-  private generateAccessToken(data: { userId: string }): string {
+  private generateAccessToken(data: Claim): string {
     return this.jwtService.sign(data);
   }
 
-  private generateRefreshToken(data: { userId: string }): string {
-    return this.jwtService.sign(data, {
-      secret: this.securityConfig.rtSecret,
-      expiresIn: this.securityConfig.refreshIn,
-    });
+  private generateRefreshToken(userId: string): string {
+    return this.jwtService.sign(
+      { userId },
+      {
+        secret: this.securityConfig.rtSecret,
+        expiresIn: this.securityConfig.refreshIn,
+      }
+    );
   }
 
-  refreshToken(token: string): Token {
+  refreshToken(token: string): Promise<Token> {
     try {
-      const { userId } = this.jwtService.verify(token, {
+      const { userId }: { userId: string } = this.jwtService.verify(token, {
         secret: this.securityConfig.rtSecret,
       });
 
-      return this.generateTokens({
-        userId,
-      });
+      return this.generateTokens(userId);
     } catch (e) {
       throw new UnauthorizedException();
     }

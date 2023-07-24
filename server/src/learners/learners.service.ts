@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
 import { AuthService } from 'src/auth/auth.service';
 import { Token } from 'src/auth/models/token.model';
 import { PasswordService } from 'src/auth/password.service';
 import { CreateLearnerInput } from './inputs/create-learner.input';
 import { UpdateLearnerInput } from './inputs/update-learner.input';
+import { Learner } from './models/learner.model';
 
 @Injectable()
 export class LearnersService {
@@ -14,6 +15,15 @@ export class LearnersService {
     private readonly prisma: PrismaService,
     private readonly passwordService: PasswordService
   ) {}
+
+  async exists(where: Prisma.LearnerWhereInput) {
+    const subject = await this.prisma.learner.findFirst({
+      where,
+      select: { id: true },
+    });
+
+    return !!subject;
+  }
 
   async create(data: CreateLearnerInput): Promise<Token> {
     const hashedPassword = await this.passwordService.hashPassword(
@@ -31,20 +41,27 @@ export class LearnersService {
       },
     });
 
-    return this.authService.generateTokens({ userId: user.id });
+    return await this.authService.generateTokens(user);
   }
 
-  update(data: UpdateLearnerInput) {
+  async update(data: UpdateLearnerInput) {
     const { id, ...userInfo } = data;
 
-    return this.prisma.user.update({
+    const { learner, ...user } = await this.prisma.user.update({
       where: { id },
       data: userInfo,
-      include: { lecturer: true },
+      include: { learner: true },
     });
+
+    return { ...learner, ...user };
   }
 
-  delete(id: string) {
-    return this.prisma.user.delete({ where: { id } });
+  async delete(id: string): Promise<Learner> {
+    const { learner, ...user } = await this.prisma.user.delete({
+      where: { id },
+      include: { learner: true },
+    });
+
+    return { ...learner, ...user };
   }
 }

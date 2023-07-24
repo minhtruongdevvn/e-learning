@@ -14,6 +14,11 @@ export class PrismaExceptionTransformInterceptor implements NestInterceptor {
                 'EXISTED',
                 `existing ${error.meta.target}`
               );
+            case 'P2025':
+              throw new ClientErrorException(
+                'NOT_FOUND',
+                `${error.meta.cause}`
+              );
             default:
               break;
           }
